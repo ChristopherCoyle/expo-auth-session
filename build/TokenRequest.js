@@ -159,12 +159,14 @@ export class TokenRequest extends Request {
     async performAsync(discovery) {
         // redirect URI must not be nil
         invariant(discovery.tokenEndpoint, `Cannot invoke \`performAsync()\` without a valid tokenEndpoint`);
-        const response = await requestAsync(discovery.tokenEndpoint, {
+        const response = await requestAsync(discovery.tokenEndpoint ? discovery.tokenEndpoint : "", {
             dataType: 'json',
             method: 'POST',
             headers: this.getHeaders(),
             body: this.getQueryBody(),
         });
+        console.log("SERVER Response:");
+        console.log(response);
         if ('error' in response) {
             throw new TokenError(response);
         }
@@ -307,7 +309,7 @@ export class RevokeTokenRequest extends Request {
      */
     async performAsync(discovery) {
         invariant(discovery.revocationEndpoint, `Cannot invoke \`performAsync()\` without a valid revocationEndpoint`);
-        await requestAsync(discovery.revocationEndpoint, {
+        await requestAsync(discovery.revocationEndpoint ? discovery.revocationEndpoint : "", {
             method: 'POST',
             headers: this.getHeaders(),
             body: this.getQueryBody(),

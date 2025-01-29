@@ -195,7 +195,7 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
       `Cannot invoke \`performAsync()\` without a valid tokenEndpoint`
     );
     const response = await requestAsync<ServerTokenResponseConfig | ResponseErrorConfig>(
-      discovery.tokenEndpoint,
+      discovery.tokenEndpoint ? discovery.tokenEndpoint : "",
       {
         dataType: 'json',
         method: 'POST',
@@ -392,7 +392,7 @@ export class RevokeTokenRequest
       discovery.revocationEndpoint,
       `Cannot invoke \`performAsync()\` without a valid revocationEndpoint`
     );
-    await requestAsync<boolean>(discovery.revocationEndpoint, {
+    await requestAsync<boolean>(discovery.revocationEndpoint ? discovery.revocationEndpoint : "", {
       method: 'POST',
       headers: this.getHeaders(),
       body: this.getQueryBody(),
