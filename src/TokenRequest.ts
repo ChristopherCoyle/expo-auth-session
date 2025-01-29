@@ -223,13 +223,15 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
         body: this.getQueryBody(),
       }
     );
-
+    console.log("ENDPOINT:")
+    console.log(discovery.tokenEndpoint)
+    
     console.log("HEADERS:")
     console.log(this.getHeaders())
 
     console.log("BODY:")
     console.log(this.getQueryBody())
-    
+
     console.log("SERVER Response:")
     console.log(response)
 
