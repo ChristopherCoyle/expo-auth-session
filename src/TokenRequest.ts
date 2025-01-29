@@ -162,6 +162,22 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
   readonly scopes?: string[];
   readonly extraParams?: Record<string, string>;
 
+
+  // REQUEST LAYOUT
+  /*
+  https://docs.aws.amazon.com/cognito/latest/developerguide/token-endpoint.html
+
+  POST https://mydomain.auth.us-east-1.amazoncognito.com/oauth2/token
+  Content-Type='application/x-www-form-urlencoded'&
+  Authorization=Basic ZGpjOTh1M2ppZWRtaTI4M2V1OTI4OmFiY2RlZjAxMjM0NTY3ODkw
+
+  grant_type=authorization_code&
+  client_id=1example23456789&
+  code=AUTHORIZATION_CODE&
+  code_verifier=CODE_VERIFIER&
+  redirect_uri=com.myclientapp://myclient/redirect
+
+   */
   constructor(
     request,
     public grantType: GrantType
@@ -171,6 +187,7 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
     this.clientSecret = request.clientSecret;
     this.extraParams = request.extraParams;
     this.scopes = request.scopes;
+
   }
 
   getHeaders(): Headers {
@@ -183,11 +200,14 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
       const credentials = `${encodedClientId}:${encodedClientSecret}`;
       const basicAuth = Base64.encodeNoWrap(credentials);
       headers.Authorization = `Basic ${basicAuth}`;
+    }else{
+      console.log("Client secret not specified")
     }
 
     return headers;
   }
 
+  //FUNCTION TO EDIT: Wrong information passed to server 
   async performAsync(discovery: Pick<ServiceConfig.DiscoveryDocument, 'tokenEndpoint'>) {
     // redirect URI must not be nil
     invariant(
@@ -203,6 +223,13 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
         body: this.getQueryBody(),
       }
     );
+
+    console.log("HEADERS:")
+    console.log(this.getHeaders())
+
+    console.log("BODY:")
+    console.log(this.getQueryBody())
+    
     console.log("SERVER Response:")
     console.log(response)
 
@@ -223,18 +250,17 @@ export class TokenRequest<T extends TokenRequestConfig> extends Request<T, Token
 
   getQueryBody() {
     const queryBody: Record<string, string> = {
-      grant_type: this.grantType,
+      grant_type: GrantType.AuthorizationCode,
     };
 
-    if (!this.clientSecret) {
-      // Only add the client ID if client secret is not present, otherwise pass the client id with the secret in the request body.
-      queryBody.client_id = this.clientId;
-    }
+    queryBody.client_id = this.clientId
+
 
     if (this.scopes) {
       queryBody.scope = this.scopes.join(' ');
     }
 
+    //Code verifier and code and redirct uri all in extras 
     if (this.extraParams) {
       for (const extra in this.extraParams) {
         if (extra in this.extraParams && !(extra in queryBody)) {
